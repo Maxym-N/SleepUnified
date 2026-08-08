@@ -52,6 +52,7 @@ for more info.
 | File | What it is | Needed to just build and run the program? |
 |---|---|---|
 | `sleep-unified.c` | The whole program — GTK settings panel plus the sleep/resume logic embedded as a byte array. Compiles into a single binary. | **Yes — this is the only file you need.** |
+| `sleep-unified-gui.c` | Optional tiny launcher: does nothing but exec `sleep-unified --gui` from the same directory it's in. Useful for a desktop/menu entry that shouldn't need to pass an argument. No functionality of its own. | No — `sleep-unified --gui` works identically without it. |
 | `sleep-unified.sh` | The sleep/resume logic on its own, as a standalone bash script. This is where that logic is actually edited; `sleep-unified.c`'s embedded copy is generated from it. Can also be run directly with `bash sleep-unified.sh` for development/testing. | No — only if you want to read or modify the logic, or run it without compiling anything. |
 | `regenerate_embedded_script.sh` | Development tool: regenerates the byte array inside `sleep-unified.c` from the current `sleep-unified.sh`, after editing the latter. | No — only needed if you're changing `sleep-unified.sh`. |
 | `99-ac-adapter-timestamp.rules` | A copy of the udev rule the program installs automatically on first run. Kept here for reference/review, or for installing it by hand instead. | No — the program installs this itself. |
@@ -69,4 +70,3 @@ live in a small external per-user config file,
 If that file doesn't exist, built-in defaults are used and the program is
 fully functional without it. "Reset to Defaults" in the GUI simply deletes
 this file.
-

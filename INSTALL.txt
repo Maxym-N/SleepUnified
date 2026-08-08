@@ -26,6 +26,13 @@ gcc `pkg-config --cflags gtk+-3.0` -o sleep-unified sleep-unified.c `pkg-config 
 
 This will generate an executable binary file named sleep-unified.
 
+Optionally, if you also want a separate launcher for the settings panel (for a desktop/menu entry, so you don't have to pass --gui yourself), compile sleep-unified-gui.c the same way, with no special flags needed, and place the resulting binary in the SAME directory as sleep-unified:
+
+bash
+gcc -o sleep-unified-gui sleep-unified-gui.c
+
+sleep-unified-gui does nothing but launch "sleep-unified --gui" from wherever it itself is located — it has no functionality of its own and is entirely optional; running `sleep-unified --gui` directly works exactly the same.
+
 4. Run the Program:
 
 The program must be run as root, since it needs to write to various hardware control files under /sys and /proc to prepare the system for sleep and restore it afterward.
@@ -57,6 +64,11 @@ To uninstall the program, remove the binary file from its installation directory
 
 bash
 sudo rm /usr/local/bin/sleep-unified
+
+If you also installed sleep-unified-gui, remove it the same way:
+
+bash
+sudo rm /usr/local/bin/sleep-unified-gui
 
 Additionally, the program creates a few files outside of its own directory during normal use. If present, you may also want to remove:
 
