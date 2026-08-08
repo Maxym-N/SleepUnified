@@ -1,0 +1,83 @@
+
+INSTALLATION INSTRUCTIONS FOR UNIFIED SLEEP MODE OPTIMIZATION FRAMEWORK
+------------------------------------------------------------------------
+
+1. Prerequisites:
+
+Before compiling the program, ensure you have the required dependencies installed on your system. Specifically, you will need the gcc compiler, the pkg-config utility, and the gtk+-3.0 library.
+
+On a Debian-based system, you can install the dependencies using the following command:
+
+bash
+sudo apt-get install build-essential pkg-config libgtk-3-dev
+
+2. Download the Program:
+
+Download the source code of Unified Sleep Mode Optimization Framework from the official repository or the provided location. Extract it if it is in a compressed format.
+
+Only sleep-unified.c is required to build and run the program — it already contains the sleep/resume logic embedded inside it. The other files in the repository (sleep-unified.sh, regenerate_embedded_script.sh, 99-ac-adapter-timestamp.rules) are development/reference material and are not needed just to compile and use the program.
+
+3. Compile the Program:
+
+To compile the source code, open a terminal in the directory containing the sleep-unified.c file and run the following command:
+
+bash
+gcc `pkg-config --cflags gtk+-3.0` -o sleep-unified sleep-unified.c `pkg-config --libs gtk+-3.0`
+
+This will generate an executable binary file named sleep-unified.
+
+4. Run the Program:
+
+The program must be run as root, since it needs to write to various hardware control files under /sys and /proc to prepare the system for sleep and restore it afterward.
+
+After compiling and installing the program, you can run it by specifying the correct path to the binary file. For example, if the binary is placed in a directory like /usr/local/bin, you can run the program by simply typing:
+
+bash
+sudo sleep-unified
+
+This puts the system to sleep immediately (headless mode) — the default, intended to be bound to a keybinding, a lid-close handler, a power-button handler, or a menu entry, in place of a raw suspend command.
+
+To open the settings panel instead of sleeping immediately, add --gui (or -g). This does not need root:
+
+bash
+sleep-unified --gui
+
+However, if you place the binary elsewhere, make sure to specify the full or relative path to the executable. For instance:
+
+bash
+/path/to/sleep-unified
+
+If you want to run the program from anywhere without specifying the path each time, you can add its directory to your system's $PATH variable.
+
+Note: this program IS the suspend mechanism, not a hook that runs around one. Do not place it in systemd-sleep's hook directories (/usr/lib/systemd/system-sleep/ or similar), and do not use it alongside other mechanisms that also call `systemctl suspend` — those trigger systemd's own suspend, and pairing that with this program would mean the actual suspend call happens twice, which serves no purpose.
+
+5. Uninstall the Program:
+
+To uninstall the program, remove the binary file from its installation directory. For example, if the program was installed in /usr/local/bin, you can run:
+
+bash
+sudo rm /usr/local/bin/sleep-unified
+
+Additionally, the program creates a few files outside of its own directory during normal use. If present, you may also want to remove:
+
+bash
+sudo rm /etc/udev/rules.d/99-ac-adapter-timestamp.rules
+sudo udevadm control --reload-rules
+rm -rf ~/.config/Unified_Sleep
+rm -f /tmp/sleep-unified.state /tmp/sleep-unified.log /tmp/ac-online-event-time
+
+The udev rule and the ~/.config/Unified_Sleep directory are only created if you actually used the corresponding features (AC-adapter spurious-wake detection, and the --gui settings panel, respectively) — they may not be present at all if you didn't.
+
+If you installed the binary in another directory, adjust the paths accordingly.
+
+6. Troubleshooting:
+
+If you encounter issues during installation or execution, ensure that all required dependencies are installed and that file paths are correctly specified. The program logs everything it does to /tmp/sleep-unified.log (or wherever LOGFILE is configured, if you changed it) — check there first. You can also check system logs (e.g. /var/log/messages, or `dmesg -T`) for any error messages that may provide further insight.
+
+7. License Information:
+
+Unified Sleep Mode Optimization Framework is licensed under the GNU General Public License (GPL) Version 3.0. Please refer to the License section in the --gui settings panel, or the included README.md, for full terms and conditions of this license.
+
+For Inquiries, Please Contact:
+
+Email: maximkursua@gmail.com

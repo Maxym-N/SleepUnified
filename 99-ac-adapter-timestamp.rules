@@ -1,0 +1,46 @@
+# /etc/udev/rules.d/99-ac-adapter-timestamp.rules
+#
+# Records the wall-clock time of every AC adapter state change (plugged in
+# OR unplugged) to /tmp/ac-online-event-time. Used by the Unified Sleep
+# Mode Optimization Framework to detect a firmware behavior where changing
+# the AC adapter's connection state while the system is asleep wakes it
+# almost immediately — this does not register as a normal ACPI wakeup
+# event, so it can't be filtered out ahead of time; instead the program
+# compares the wake time to this timestamp after the fact.
+#
+# Both directions are tracked (not just plug-in) because testing showed
+# unplugging the adapter can also trigger the same near-instant wake on
+# this hardware.
+#
+# This rule is purely reactive: it only runs in response to a uevent the
+# kernel already generated (attribute change), so it never causes a wakeup
+# or keeps the system from sleeping. It matches ANY "Mains" type power
+# supply (not tied to a specific device name like AC0, ADP1, etc., so it
+# keeps working if that name ever changes).
+#
+# NOTE: this writes plain `date` output (no format specifier), not
+# `date +%s`. A literal "%" in a udev rule is intercepted by udev's own
+# substitution engine before the command ever reaches the shell — on this
+# system that silently ate the "%s" format specifier and produced an empty
+# file. Avoiding "%" entirely sidesteps that; sleep-unified converts this
+# plain date string to epoch seconds itself via `date -d`.
+#
+# --- Install ---
+#
+# Normally you do NOT need to install this file by hand: running the
+# sleep-unified program (either `bash sleep-unified.sh` or the compiled
+# `sleep-unified` binary, headless) installs this exact rule automatically
+# the first time it runs, if it isn't already present — see
+# ensure_ac_udev_rule() in sleep-unified.sh. This standalone copy exists
+# for reference (e.g. to review the rule's exact contents before trusting
+# the program to write to /etc automatically) and as a fallback for
+# installing it by hand instead, if you'd rather do that:
+#
+#   sudo cp 99-ac-adapter-timestamp.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload-rules
+#
+# No reboot needed either way; it takes effect on the next AC adapter
+# plug/unplug event.
+
+ACTION=="change", SUBSYSTEM=="power_supply", ATTR{type}=="Mains", ATTR{online}=="1", RUN+="/bin/sh -c 'date > /tmp/ac-online-event-time'"
+ACTION=="change", SUBSYSTEM=="power_supply", ATTR{type}=="Mains", ATTR{online}=="0", RUN+="/bin/sh -c 'date > /tmp/ac-online-event-time'"
